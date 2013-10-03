@@ -29,6 +29,7 @@ static IMP g_originalConnAlloc = NULL;
 static NSMutableDictionary *g_stubResponses = nil; // URL -> StubResponse
 
 static MockNSHTTPURLResponse *g_everyResponse = nil;
+static NSError *g_everyResponseError = nil;
 
 #pragma mark -
 @implementation MockNSURLConnection {
@@ -91,6 +92,7 @@ static MockNSHTTPURLResponse *g_everyResponse = nil;
   g_stubResponses = nil;
   
   g_everyResponse = nil;
+  g_everyResponseError = nil;
     
   Class parentKlass = [NSURLConnection class];
   SEL allocSel = @selector(alloc);
@@ -132,6 +134,10 @@ static MockNSHTTPURLResponse *g_everyResponse = nil;
     [self stubEveryResponse:r];
 }
 
++ (void) stubEveryResponseError:(NSError*)error {
+    g_everyResponseError = error;
+}
+
 #pragma mark - NSURLConnection public overrides
 - (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate startImmediately:(BOOL)startImmediately {
   _request = request;
@@ -164,6 +170,11 @@ static MockNSHTTPURLResponse *g_everyResponse = nil;
 }
 
 - (void)start {
+ 
+  if(g_everyResponseError){
+      [_delegate connection:(NSURLConnection*)self didFailWithError:g_everyResponseError];
+      return;
+  }
     
   MockNSHTTPURLResponse *r;
     

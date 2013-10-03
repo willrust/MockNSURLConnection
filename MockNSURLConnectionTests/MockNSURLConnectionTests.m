@@ -141,10 +141,24 @@
     [self verifyDelegate];
 }
 
+- (void)test_StubError_forEveryURL
+{
+  NSError *error = [[NSError alloc] initWithDomain:url code:NSURLErrorBadURL userInfo:nil];
+  [MockNSURLConnection stubEveryResponseError:error];
+
+  conn = [[NSURLConnection alloc] initWithRequest:request
+                                         delegate:delegate
+                                 startImmediately:YES];
+    
+  STAssertFalse(delegate.connectionCompleted, nil);
+  STAssertTrue(delegate.connectionFailed, nil);
+  STAssertEqualObjects(delegate.connectionError, error, nil);
+}
+
 - (void) testNoStartImmediately
 {
-  [MockNSURLConnection stubEveryResponseStatus:status body:body];
-  
+  [MockNSURLConnection stubResponseStatus:status body:body forURL:url];
+    
   conn = [[NSURLConnection alloc] initWithRequest:request
                                          delegate:delegate
                                  startImmediately:NO];

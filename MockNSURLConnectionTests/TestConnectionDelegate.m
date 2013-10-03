@@ -58,6 +58,8 @@
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+  self.connectionFailed = YES;
+  self.connectionError = error;
   return;
 }
 

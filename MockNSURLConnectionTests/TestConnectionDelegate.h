@@ -13,6 +13,8 @@
 @property (strong, nonatomic) NSURLResponse *receivedResponse;
 @property (strong, nonatomic) NSMutableData *receivedData;
 @property (assign, nonatomic) BOOL connectionCompleted;
+@property (assign, nonatomic) NSError *connectionError;
+@property (assign, nonatomic) BOOL connectionFailed;
 
 @property (strong, nonatomic) NSData *expectedBody;
 @property (assign, nonatomic) NSInteger expectedStatus;

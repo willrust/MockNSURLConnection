@@ -54,6 +54,11 @@
 + (void) stubEveryResponseStatus:(NSInteger)statusCode body:(NSString*)body;
 + (void) stubEveryResponseStatus:(NSInteger)statusCode bodyData:(NSData*)body;
 
+/**
+ *  Set an error to be received by the delegate for every request.
+ */
++ (void) stubEveryResponseError:(NSError*)error;
+
 
 #pragma mark - NSURLConnection public interface
 
