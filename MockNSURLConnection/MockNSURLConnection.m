@@ -28,6 +28,8 @@
 static IMP g_originalConnAlloc = NULL;
 static NSMutableDictionary *g_stubResponses = nil; // URL -> StubResponse
 
+static MockNSHTTPURLResponse *g_everyResponse = nil;
+
 #pragma mark -
 @implementation MockNSURLConnection {
   NSURLRequest *_request;
@@ -88,6 +90,8 @@ static NSMutableDictionary *g_stubResponses = nil; // URL -> StubResponse
 + (void) stopStubbing {
   g_stubResponses = nil;
   
+  g_everyResponse = nil;
+    
   Class parentKlass = [NSURLConnection class];
   SEL allocSel = @selector(alloc);
   Method superMethod = class_getClassMethod(parentKlass, allocSel);
@@ -112,6 +116,21 @@ static NSMutableDictionary *g_stubResponses = nil; // URL -> StubResponse
   [self stubResponse:r forURL:requestURL];
 }
 
++ (void) stubEveryResponse:(MockNSHTTPURLResponse *)response {
+    g_everyResponse = response;
+}
+
++ (void) stubEveryResponseStatus:(NSInteger)statusCode body:(NSString*)body {
+    NSData *bodyData = [body dataUsingEncoding:NSUTF8StringEncoding];
+    [self stubEveryResponseStatus:statusCode bodyData:bodyData];
+}
+
++ (void) stubEveryResponseStatus:(NSInteger)statusCode bodyData:(NSData*)body {
+    MockNSHTTPURLResponse *r = [[MockNSHTTPURLResponse alloc] init];
+    [r setStatusCode:statusCode];
+    [r setHTTPBody:body];
+    [self stubEveryResponse:r];
+}
 
 #pragma mark - NSURLConnection public overrides
 - (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate startImmediately:(BOOL)startImmediately {
@@ -145,8 +164,15 @@ static NSMutableDictionary *g_stubResponses = nil; // URL -> StubResponse
 }
 
 - (void)start {
-  MockNSHTTPURLResponse *r = [g_stubResponses objectForKey:[self.currentRequest.URL absoluteString]];
-  
+    
+  MockNSHTTPURLResponse *r;
+    
+  if(g_everyResponse) {
+    r = g_everyResponse;
+  } else {
+    r = [g_stubResponses objectForKey:[self.currentRequest.URL absoluteString]];
+  }
+    
   if (nil == r) {
 //    [UnexpectedStubURLRequestException raiseForURL:[_request.URL absoluteString]];
     // ARC does not like the +raise methods - it overreleases. oh well.

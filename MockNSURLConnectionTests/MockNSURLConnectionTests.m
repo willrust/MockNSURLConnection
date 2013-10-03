@@ -102,9 +102,48 @@
   [self verifyDelegate];
 }
 
+- (void)test_StubResponseCode_body_forEveryURL
+{
+    [MockNSURLConnection stubResponseStatus:status body:body forURL:url];
+    
+    conn = [[NSURLConnection alloc] initWithRequest:request
+                                           delegate:delegate
+                                   startImmediately:YES];
+    [self verifyDelegate];
+}
+
+- (void)test_StubResponseCode_bodyData_forEveryURL
+{
+    [MockNSURLConnection stubEveryResponseStatus:status
+                                        bodyData:[body dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    conn = [[NSURLConnection alloc] initWithRequest:request
+                                           delegate:delegate
+                                   startImmediately:YES];
+    
+    [self verifyDelegate];
+}
+
+- (void)test_StubResponse_forEveryURL
+{
+    MockNSHTTPURLResponse *r = [[MockNSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:url]
+                                                                 MIMEType:@"text/html"
+                                                    expectedContentLength:3
+                                                         textEncodingName:@"UTF8"];
+    [r setStatusCode:status];
+    [r setHTTPBody:[body dataUsingEncoding:NSUTF8StringEncoding]];
+    [MockNSURLConnection stubEveryResponse:r];
+    
+    conn = [[NSURLConnection alloc] initWithRequest:request
+                                           delegate:delegate
+                                   startImmediately:YES];
+    
+    [self verifyDelegate];
+}
+
 - (void) testNoStartImmediately
 {
-  [MockNSURLConnection stubResponseStatus:status body:body forURL:url];
+  [MockNSURLConnection stubEveryResponseStatus:status body:body];
   
   conn = [[NSURLConnection alloc] initWithRequest:request
                                          delegate:delegate
