@@ -47,6 +47,13 @@
 + (void) stubResponseStatus:(NSInteger)statusCode body:(NSString*)body forURL:(NSString*)requestURL;
 + (void) stubResponseStatus:(NSInteger)statusCode bodyData:(NSData*)body forURL:(NSString*)requestURL;
 
+/**
+ * Stub out a response to receive for any URL.
+ */
++ (void) stubEveryResponse:(MockNSHTTPURLResponse *)response;
++ (void) stubEveryResponseStatus:(NSInteger)statusCode body:(NSString*)body;
++ (void) stubEveryResponseStatus:(NSInteger)statusCode bodyData:(NSData*)body;
+
 
 #pragma mark - NSURLConnection public interface
 
