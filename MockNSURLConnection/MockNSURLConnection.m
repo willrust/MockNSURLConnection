@@ -171,29 +171,35 @@ static NSError *g_everyResponseError = nil;
 
 - (void)start {
  
-  if(g_everyResponseError){
+  if (g_everyResponseError){
       [_delegate connection:(NSURLConnection*)self didFailWithError:g_everyResponseError];
       return;
   }
     
   MockNSHTTPURLResponse *r;
     
-  if(g_everyResponse) {
+  if (g_everyResponse) {
     r = g_everyResponse;
   } else {
     r = [g_stubResponses objectForKey:[self.currentRequest.URL absoluteString]];
   }
     
   if (nil == r) {
-//    [UnexpectedStubURLRequestException raiseForURL:[_request.URL absoluteString]];
-    // ARC does not like the +raise methods - it overreleases. oh well.
     UnexpectedStubURLRequestException *e = [[UnexpectedStubURLRequestException alloc] initWithURL:[_request.URL absoluteString]];
     [e raise];
   }
-  
-  [_delegate connection:(NSURLConnection*)self didReceiveResponse:(NSURLResponse*)r];
-  [_delegate connection:(NSURLConnection*)self didReceiveData:[r HTTPBody]];
-  [_delegate connectionDidFinishLoading:(NSURLConnection*)self];
+
+  if ([_delegate respondsToSelector:@selector(connection: didReceiveResponse:)]) {
+      [_delegate connection:(NSURLConnection*)self didReceiveResponse:(NSURLResponse*)r];
+  }
+    
+  if ([_delegate respondsToSelector:@selector(connection: didReceiveData:)]) {
+      [_delegate connection:(NSURLConnection*)self didReceiveData:[r HTTPBody]];
+  }
+    
+  if ([_delegate respondsToSelector:@selector(connectionDidFinishLoading:)]) {
+      [_delegate connectionDidFinishLoading:(NSURLConnection*)self];
+  }
 }
 
 - (void)cancel {
